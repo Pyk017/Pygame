@@ -33,6 +33,7 @@ pygame.mixer.music.play(-1, 0.0)
 score = 0
 
 class Player(object):
+	global score
 	def __init__(self, x, y, width, height):
 		self.x = x
 		self.y = y
@@ -73,7 +74,7 @@ class Player(object):
 		self.isJump = False
 		self.walkCount = 0
 		font1 = pygame.font.SysFont('comicsans', 50)
-		text = font1.render('KILLED!! Rewarded -5', 1, (255, 0, 0))
+		text = font1.render(f"KILLED!! Rewarded -5.", 1, (255, 0, 0))
 		screen.blit(text, (250 - (text.get_width()/2), 200))
 		# button("Play!", 100, 300, 100, 50, green, bright_green, game_loop)
 		# button("Exit!", 300, 300, 100, 50, red, bright_red, game_quit)
@@ -231,16 +232,66 @@ def game_intro(text):
 		pygame.display.update()
 
 
+def unpause():
+	global pause 
+	pause = False
+
+def paused():
+
+	global pause
+	large_text = pygame.font.SysFont('comicsans', 50)
+	text_surface, text_rect = text_objects("PAUSED!", large_text)
+	text_rect.center = (int(screen_WIDTH / 2), 150)
+	screen.blit(text_surface, text_rect)
+
+	while pause:
+		for event in pygame.event.get():
+			if event.type == pygame.QUIT:
+				pygame.quit()
+				quit()
+
+		button("Continue!", 100, 300, 150, 50, green, bright_green, unpause)
+		button('QUIT!', 300, 300, 100, 50, red, bright_red, game_quit)
+
+		pygame.display.update()
+		clock.tick(15)
+
+
+def winWindow():
+	global score
+	large_text = pygame.font.SysFont('comicsans', 50)
+	text_surface, text_rect = text_objects(f"You Won!! Score = {score}", large_text)
+	text_rect.center = (int(screen_WIDTH / 2), 150)
+	screen.blit(text_surface, text_rect)
+	score = 0
+	while True:
+		for event in pygame.event.get():
+			if event.type == pygame.QUIT:
+				pygame.quit()
+				quit()
+
+		button('Restart!', 100, 300, 100, 50, green, bright_green, game_loop)
+		button('QUIT!', 300, 300, 100, 50, red, bright_red, game_quit)
+
+		pygame.display.update()
+		clock.tick(15)
+
+
+
 
 
 font = pygame.font.SysFont('comicsnas', 30, True)
 bulletloop = 0
 bullets = []
+pause = False
+score = 0
+man, goblin = None, None
 
 def game_loop():
 	global bullets
 	global bulletloop
 	global score
+	global pause
 	man = Player(50, 410, 64, 64)
 	goblin = Enemy(100, 410, 64, 64, 450)
 	# print('in it')
@@ -255,6 +306,10 @@ def game_loop():
 				if man.hitbox[0] + man.hitbox[2] > goblin.hitbox[0] and man.hitbox[0]  < goblin.hitbox[0] + goblin.hitbox[2]:
 					score -= 5
 					man.hit()
+
+		if not goblin.visible:
+			bullets = []
+			winWindow()
 
 
 		if bulletloop > 0:
@@ -304,6 +359,10 @@ def game_loop():
 			man.left = False
 			man.right = True
 			man.standing = False
+
+		elif keys[pygame.K_ESCAPE]:
+			pause = True
+			paused()
 
 		else:
 			man.standing = True
