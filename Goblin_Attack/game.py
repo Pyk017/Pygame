@@ -1,13 +1,16 @@
 import pygame
 pygame.init()
 
+
+# Screen Dimentions
 screen_WIDTH = 500
 screen_HEIGHT = 480
 
-screen = pygame.display.set_mode((screen_WIDTH, screen_HEIGHT))
+screen = pygame.display.set_mode((screen_WIDTH, screen_HEIGHT))	# Window object
 
-pygame.display.set_caption("Jump Game")
+pygame.display.set_caption("Jump Game")		# Game title
 
+# some constants tuple of color (in RGB).
 black = (0, 0, 0)
 white = (255, 255, 255)
 red = (255, 0, 0)
@@ -15,7 +18,7 @@ green = (0, 200, 0)
 bright_red = (200, 0, 0)
 bright_green = (0, 128, 0)
 
-
+# Images of character and enemies with movements specified.
 walkRight = [pygame.image.load('R1.png'), pygame.image.load('R2.png'), pygame.image.load('R3.png'), pygame.image.load('R4.png'), pygame.image.load('R5.png'), pygame.image.load('R6.png'), pygame.image.load('R7.png'), pygame.image.load('R8.png'), pygame.image.load('R9.png')]
 walkLeft = [pygame.image.load('L1.png'), pygame.image.load('L2.png'), pygame.image.load('L3.png'), pygame.image.load('L4.png'), pygame.image.load('L5.png'), pygame.image.load('L6.png'), pygame.image.load('L7.png'), pygame.image.load('L8.png'), pygame.image.load('L9.png')]
 bg = pygame.image.load('bg.jpg')
@@ -24,14 +27,17 @@ intro_bg = pygame.image.load('background2.png')
 
 clock = pygame.time.Clock()
 
+# sound files
 bulletSound = pygame.mixer.Sound('bullet.wav')
 hitSound = pygame.mixer.Sound('hit.wav')
-
 pygame.mixer.music.load('music.mp3')
 pygame.mixer.music.play(-1, 0.0)
 
+# global score variable
 score = 0
 
+
+# Player Class
 class Player(object):
 	global score
 	def __init__(self, x, y, width, height):
@@ -48,8 +54,9 @@ class Player(object):
 		self.standing = True
 		self.hitbox = (self.x + 17, self.y + 11, 29, 52)
 
-	def draw(self, screen):
-		if self.walkCount + 1 >= 27:
+	# player class method to draw player on the screen, using the list of images declared above(walkLeft, walkRight)
+	def draw(self, screen):			
+		if self.walkCount + 1 >= 27:	
 			self.walkCount = 0
 
 		if not(self.standing):
@@ -65,9 +72,9 @@ class Player(object):
 			else:
 				screen.blit(walkLeft[0], (self.x, self.y))
 		self.hitbox = (self.x + 17, self.y + 11, 29, 52)
-		# pygame.draw.rect(screen, (255, 0, 0), self.hitbox, 2)
+		
 
-	def hit(self):
+	def hit(self):		# method used when player collide with goblin
 		self.x = 60
 		self.y = 410
 		self.jumpCount = 10
@@ -100,6 +107,7 @@ class Player(object):
 		# 			pygame.quit()
 
 
+# Bullet Class
 class Projectile(object):
 	def __init__(self, x, y, radius, color, facing):
 		self.x = x
@@ -109,11 +117,13 @@ class Projectile(object):
 		self.facing = facing
 		self.velocity = 8 * facing
 
-	def draw(self, screen):
+	def draw(self, screen): # method to draw circle (or bullets) fired by player
 		pygame.draw.circle(screen, self.color, (int(self.x), int(self.y)), self.radius)
 
 
+# Goblin Class
 class Enemy(object):
+	# some static variable lists of image object 
 	walkRight = [pygame.image.load('R1E.png'), pygame.image.load('R2E.png'), pygame.image.load('R3E.png'), pygame.image.load('R4E.png'), pygame.image.load('R5E.png'), pygame.image.load('R6E.png'), pygame.image.load('R7E.png'), pygame.image.load('R8E.png'), pygame.image.load('R9E.png'), pygame.image.load('R10E.png'), pygame.image.load('R11E.png')]
 	walkLeft = [pygame.image.load('L1E.png'), pygame.image.load('L2E.png'), pygame.image.load('L3E.png'), pygame.image.load('L4E.png'), pygame.image.load('L5E.png'), pygame.image.load('L6E.png'), pygame.image.load('L7E.png'), pygame.image.load('L8E.png'), pygame.image.load('L9E.png'), pygame.image.load('L10E.png'), pygame.image.load('L11E.png')]
 
@@ -130,7 +140,7 @@ class Enemy(object):
 		self.health = 10
 		self.visible = True
 
-	def draw(self, screen):
+	def draw(self, screen):		# draw goblin on the screen.
 		self.move()
 		if self.visible:
 			if self.walkCount + 1 >= 33:
@@ -143,6 +153,7 @@ class Enemy(object):
 			else:
 				screen.blit(self.walkLeft[self.walkCount // 3], (self.x, self.y))
 				self.walkCount += 1
+
 			self.hitbox = (self.x + 17, self.y + 2, 31, 57)
 			pygame.draw.rect(screen, (255, 0, 0), (self.hitbox[0], self.hitbox[1] - 20, 50, 10))
 			pygame.draw.rect(screen, (0, 128, 0), (self.hitbox[0], self.hitbox[1] - 20, 50 - (5 * (10 - self.health)), 10))
@@ -211,7 +222,7 @@ def game_quit():
 	pygame.quit()
 	quit()
 
-
+# Introduction screen of the Game
 def game_intro(text):
 	intro = True
 	while intro:
@@ -256,7 +267,7 @@ def paused():
 		pygame.display.update()
 		clock.tick(15)
 
-
+# Winning Screen of the Game
 def winWindow():
 	global score
 	large_text = pygame.font.SysFont('comicsans', 50)
@@ -279,7 +290,7 @@ def winWindow():
 
 
 
-
+# global variables
 font = pygame.font.SysFont('comicsnas', 30, True)
 bulletloop = 0
 bullets = []
@@ -287,6 +298,8 @@ pause = False
 score = 0
 man, goblin = None, None
 
+
+# Main game loop
 def game_loop():
 	global bullets
 	global bulletloop
@@ -369,6 +382,7 @@ def game_loop():
 			man.walkCount = 0
 
 
+		# below are the calculation of jump of player using Quadratic Equation
 		if not(man.isJump):
 			if keys[pygame.K_UP]:
 				man.isJump = True
